@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 
 """PyQt4 port of the layouts/basiclayout example from Qt v4.x"""
 
 from PySide import QtCore, QtGui
-import os,sys
+import os,sys,re
 from datetime import datetime
 sys.path.insert(0, r'E:\python\imagetagger')
 from taglistingmanager import TagListingManager
@@ -88,23 +88,32 @@ class Dialog(QtGui.QDialog):
         self.setCompleterList()
 
     def jumpToEmpty(self):
+        self.tagattyLukumaara=0
         for i, kuva in enumerate( self.kuvatiedostolista):
-            if kuva not in self.taglisting.kuvatHash.keys():
-                break
-        if i == len(self.kuvatiedostolista)-1:
-            return 0
-        else:
+            if kuva in self.taglisting.kuvatHash.keys():
+                self.tagattyLukumaara +=1
+        if self.tagattyLukumaara < len(self.kuvatiedostolista):
+            for i, kuva in enumerate( self.kuvatiedostolista):
+                if kuva not in self.taglisting.kuvatHash.keys():
+                    break
             return i
+        else:
+            return 0
 
     def setCompleterList(self):
         tageiar=[]
         for tagii in self.taglisting.kuvatHash.values():
-            tagiar= tagii.split(",")
+            try:
+                tagiar= re.split(r'[, ]', tagii.decode("utf-8"))
+                tageiar.append(tagii.decode("utf-8"))
+            except:
+                tagiar= re.split(r'[, ]', tagii )
+                tageiar.append(tagii )
             tagiar2=[tg.strip() for tg in tagiar]
             tageiar += tagiar2
-            tageiar.append(tagii)
+
         tageiarunq=list( set( tageiar))
-##        print tageiar
+        print tageiar
         self.setCompleterValues(tageiarunq)
 
     def tiedostonLastMod(self,tiedosto):
@@ -139,8 +148,9 @@ class Dialog(QtGui.QDialog):
         tagirivi += self.kuvakansio +" | tagd: " + timenowstr + "\n"
         print tagirivi
         self.taglisting.lisaaTagi(self.tagitlineEdit.text(), tagirivi)
+        self.lastTagi=self.tagitlineEdit.text()
         self.setCompleterList()
-        self.tagitlineEdit.setText( "")
+        self.tagitlineEdit.setText( self.lastTagi)
         if self.autoNextPic:
             self.nextImage()
 
@@ -149,6 +159,8 @@ class Dialog(QtGui.QDialog):
         fileName = self.kuvatiedostolista[self.indx] #r"E:\kuvat\IMG_2561.JPG"
         infotxt = "Kansio: " + self.kuvakansio + "     kuva: " +fileName
         infotxt += "    " + str(self.indx+1) +"/" + str( len(self.kuvatiedostolista))
+        infotxt += "    otettu: " +  get_date_taken(fileName)
+        infotxt += "    tagatty: " +  str(self.tagattyLukumaara) +"/" + str( len(self.kuvatiedostolista))
         self.infolabel.setText(infotxt)
         image = QtGui.QImage(fileName)
         if image.isNull():
@@ -161,11 +173,11 @@ class Dialog(QtGui.QDialog):
         pixkokoz=size.width(), size.height()
         self.pixkoko= str(pixkokoz[0])+"X"+str(pixkokoz[1])
         pxmap = QtGui.QPixmap.fromImage(image)
-        pxmap=pxmap.scaledToHeight(500)
+        pxmap=pxmap.scaledToHeight(600)
         if self.kuvatiedostolista[self.indx] in self.taglisting.kuvatHash.keys() :  #jos kuva on jo luettelossa
             self.tagitlineEdit.setText( self.taglisting.kuvatHash[self.kuvatiedostolista[self.indx]].decode("utf-8"))
-        else:
-            self.tagitlineEdit.setText("")
+##        else:
+##            self.tagitlineEdit.setText("")
         self.imageLabel.setPixmap(pxmap)
 
 ##        self.scaleFactor = 0.5
@@ -177,6 +189,7 @@ class Dialog(QtGui.QDialog):
             self.indx = 0
         self.loadImg()
         self.tagitlineEdit.setFocus()
+        self.tagitlineEdit.selectAll()
 
     def prevImage(self):
         self.indx -= 1
@@ -185,6 +198,7 @@ class Dialog(QtGui.QDialog):
 
         self.loadImg()
         self.tagitlineEdit.setFocus()
+        self.tagitlineEdit.selectAll()
 
 if __name__ == '__main__':
 
