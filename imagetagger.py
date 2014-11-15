@@ -35,11 +35,14 @@ class Dialog(QtGui.QDialog):
         layout.setRowMinimumHeight(0, 500)
 ##        for i in range(Dialog.NumGridRows):
         lbutton = QtGui.QPushButton("T&aakse"  )
+        lbutton.setFocusPolicy(QtCore.Qt.NoFocus)
         layout.addWidget(lbutton, 1, 0)
         rbutton = QtGui.QPushButton("E&teen"  )
+        rbutton.setFocusPolicy(QtCore.Qt.NoFocus)
         layout.addWidget(rbutton, 1, 5)
         tagitlabel = QtGui.QLabel("Tagit" )
         self.tagitlineEdit = QtGui.QLineEdit()
+        self.tagitlineEdit.returnPressed.connect(self._lineedit_returnPressed)
 
         layout.addWidget(tagitlabel, 6, 0)
         layout.addWidget(self.tagitlineEdit, 6, 1)
@@ -69,6 +72,9 @@ class Dialog(QtGui.QDialog):
         rbutton.clicked.connect(self.nextImage)
         lbutton.clicked.connect(self.prevImage)
 
+    def _lineedit_returnPressed(self):
+        print "text:", self.tagitlineEdit.text()
+        self.nextImage()
 
     def loadImg(self):
         fileName = self.folderListing[self.imageIndx] #r"E:\kuvat\IMG_2561.JPG"
