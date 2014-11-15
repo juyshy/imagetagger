@@ -1,4 +1,4 @@
-
+from PySide import  QtGui
 from datetime import datetime
 
 
@@ -58,12 +58,12 @@ class TagListingManager(object):
             kuvalistausArr.pop(0)
             print "kuvalistausArr[0] ",kuvalistausArr[0]
 
-
-	for i in range(len(kuvalistausArr)):
-		tagriviarray=kuvalistausArr[i].split("|")
-		#puts tagriviarray.size
-        if len(tagriviarray) >= 3 and len( tagriviarray) <= 5:
-            self.kuvatHash[tagriviarray[0].strip()]=tagriviarray[1].strip()
+        for i in range(len(kuvalistausArr)):
+            tagriviarray=kuvalistausArr[i].split("|")
+            #puts tagriviarray.size
+            if len(tagriviarray) >= 3 and len( tagriviarray) <= 5:
+                self.kuvatHash[tagriviarray[0].strip()]=tagriviarray[1].strip()
+##        self.setCompleterList()
 ##    self.kuvatHash.keys()[:5]
 
 ##
@@ -79,6 +79,14 @@ class TagListingManager(object):
             tallennaTied(self.ohjelmapath+"/"+self.luetteloTiedosto, tagirivi)
         else:
             print "identtinen on jo"
+##        print  self.kuvatHash.values()
+##        self.setCompleterList()
+
+
+####        self.state.setCompleterValues(tageiar)
+##        completer = QtGui.QCompleter(tageiar, self)
+##        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+##        self.state.tagitlineEdit.setCompleter(completer)
 
 
 

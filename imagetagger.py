@@ -35,7 +35,8 @@ class Dialog(QtGui.QDialog):
 
         self.setWindowTitle("Basic Layouts")
         self.tagitlineEdit.setFocus()
-
+        self.indx=self.jumpToEmpty()
+        self.loadImg()
 
 
     def createGridGroupBox(self):
@@ -52,6 +53,8 @@ class Dialog(QtGui.QDialog):
         layout.addWidget(rbutton, 1, 5)
         tagitlabel = QtGui.QLabel("Tagit" )
         self.tagitlineEdit = QtGui.QLineEdit()
+
+
         self.tagitlineEdit.returnPressed.connect(self._lineedit_returnPressed)
 
         layout.addWidget(tagitlabel, 6, 0)
@@ -77,10 +80,32 @@ class Dialog(QtGui.QDialog):
 
 
 
-        self.loadImg()
+##        self.loadImg()
 
         rbutton.clicked.connect(self.nextImage)
         lbutton.clicked.connect(self.prevImage)
+##        wordList = ["alpha", "omega", "omicron", "zeta"]
+        self.setCompleterList()
+
+    def jumpToEmpty(self):
+        for i, kuva in enumerate( self.kuvatiedostolista):
+            if kuva not in self.taglisting.kuvatHash.keys():
+                break
+        if i == len(self.kuvatiedostolista)-1:
+            return 0
+        else:
+            return i
+
+    def setCompleterList(self):
+        tageiar=[]
+        for tagii in self.taglisting.kuvatHash.values():
+            tagiar= tagii.split(",")
+            tagiar2=[tg.strip() for tg in tagiar]
+            tageiar += tagiar2
+            tageiar.append(tagii)
+        tageiarunq=list( set( tageiar))
+##        print tageiar
+        self.setCompleterValues(tageiarunq)
 
     def tiedostonLastMod(self,tiedosto):
 ##        tiedosto=r"E:\kuvat\137___08\IMG_3773.JPG"
@@ -91,6 +116,12 @@ class Dialog(QtGui.QDialog):
 ##         print datetime.fromtimestamp(os.stat(tiedosto).st_mtime)
 
         get_date_taken(tiedosto)
+
+    def setCompleterValues(self,wordList):
+
+        completer = QtGui.QCompleter(wordList, self)
+        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.tagitlineEdit.setCompleter(completer)
 
     def _lineedit_returnPressed(self):
         print "text:", self.tagitlineEdit.text()
@@ -108,8 +139,11 @@ class Dialog(QtGui.QDialog):
         tagirivi += self.kuvakansio +" | tagd: " + timenowstr + "\n"
         print tagirivi
         self.taglisting.lisaaTagi(self.tagitlineEdit.text(), tagirivi)
+        self.setCompleterList()
+        self.tagitlineEdit.setText( "")
         if self.autoNextPic:
             self.nextImage()
+
 
     def loadImg(self):
         fileName = self.kuvatiedostolista[self.indx] #r"E:\kuvat\IMG_2561.JPG"
@@ -128,6 +162,10 @@ class Dialog(QtGui.QDialog):
         self.pixkoko= str(pixkokoz[0])+"X"+str(pixkokoz[1])
         pxmap = QtGui.QPixmap.fromImage(image)
         pxmap=pxmap.scaledToHeight(500)
+        if self.kuvatiedostolista[self.indx] in self.taglisting.kuvatHash.keys() :  #jos kuva on jo luettelossa
+            self.tagitlineEdit.setText( self.taglisting.kuvatHash[self.kuvatiedostolista[self.indx]].decode("utf-8"))
+        else:
+            self.tagitlineEdit.setText("")
         self.imageLabel.setPixmap(pxmap)
 
 ##        self.scaleFactor = 0.5
