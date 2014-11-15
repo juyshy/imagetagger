@@ -1,79 +1,84 @@
 
+from datetime import datetime
 
-class TagListingManager
 
-attr_reader :kuvatHash
-attr_writer :kuvatHash
 
-def lataaTiedosto(lataatama)
+def lataaTiedosto(lataatama):
 
-begin 
-f = File.open(lataatama)
-rescue Exception => e 
-tnimi = lataatama
-now = Time.now
-sisalto = @luontikaneetti+now.to_s+"\n"
-sisalto += @sarakkeidenselitys +"\n"
-tallennaTied(tnimi, sisalto)
-end
-f = File.open(lataatama)
-tiedstr= f.read
-f.close
-tiedstr
-end
+    try:
+        f = open(lataatama, 'r')
+    except:
+        tnimi = lataatama
+        now = datetime.now()
+        sisalto = self.luontikaneetti+str( now) +"\n"
+        sisalto += self.sarakkeidenselitys +"\n"
+        saveAFile(tnimi, sisalto)
 
-def tallennaTied(tnimi, sisalto)
-puts "tallennus"
-aFile = File.new(tnimi, "a")
-aFile.write(sisalto)
-aFile.close
-end
+        f = open(lataatama, 'r')
+    loadedFileContent=f.read()
+    f.close()
+    return loadedFileContent
 
-def initialize
+def saveAFile(filename,content):
+    f = open(filename, 'w')
+    f.write(content)
+    f.close()
 
-@kuvatHash = {}
-@luetteloTiedosto = "tagiluettelo.txt"
+def tallennaTied(tiednimi,sisalto):
+    print "tallennus"
+    f = open(tiednimi, 'a')
+    f.write(sisalto.encode("utf-8"))
+    f.close()
 
-@luontikaneetti = "uusi tagi lista luotu: "
-@sarakkeidenselitys = "tiedostonimi | tagit | kuvatiedoston last modified kuvapixelikoko kuvatiedosto koko | sijaintikansio | tagirivin luontihetki"
-@state = nil
 
-kuvalistaus = lataaTiedosto($ohjelmapath+"/"+@luetteloTiedosto)
-kuvalistausArr = kuvalistaus.split("\n")
-print "kuvalistausArr[0] ",kuvalistausArr[0]; puts
-if kuvalistausArr[0].include?(@luontikaneetti[0,9])
-kuvalistausArr.shift
-print "kuvalistausArr[0] ",kuvalistausArr[0]; puts
-end
-selitysrivinalku = "tiedostonimi | tagit | kuvatiedoston last modified kuvapixelikoko"
-if kuvalistausArr[0].include?(selitysrivinalku)
-kuvalistausArr.shift
-print "kuvalistausArr[0] ",kuvalistausArr[0]; puts
-end
+class TagListingManager(object):
 
-	for i in 0..kuvalistausArr.size-1
+
+    def __init__(self,ohjelmapath):
+##        ohjelmapath=r"E:\python\imagetagger"
+##        self.state = gui
+        self.ohjelmapath=ohjelmapath
+        self.kuvatHash = {}
+        self.luetteloTiedosto = "tagiluettelo.txt"
+
+        self.luontikaneetti = "uusi tagi lista luotu: "
+        self.sarakkeidenselitys = "tiedostonimi | tagit | kuvatiedoston last modified kuvapixelikoko kuvatiedosto koko | sijaintikansio | tagirivin luontihetki"
+        self.state = None
+
+        kuvalistaus = lataaTiedosto(self.ohjelmapath+"/"+self.luetteloTiedosto)
+        kuvalistaus[:200]
+        kuvalistausArr = kuvalistaus.split("\n")
+        print "kuvalistausArr[0] ",kuvalistausArr[0]
+        if self.luontikaneetti[0:9] in kuvalistausArr[0]:
+            kuvalistausArr.pop(0)
+            print "kuvalistausArr[0] ",kuvalistausArr[0]
+
+        selitysrivinalku = "tiedostonimi | tagit | kuvatiedoston last modified kuvapixelikoko"
+        if selitysrivinalku in kuvalistausArr[0]:
+            kuvalistausArr.pop(0)
+            print "kuvalistausArr[0] ",kuvalistausArr[0]
+
+
+	for i in range(len(kuvalistausArr)):
 		tagriviarray=kuvalistausArr[i].split("|")
 		#puts tagriviarray.size
-		if tagriviarray.size >= 3 and tagriviarray.size <= 5
-		@kuvatHash[tagriviarray[0].strip]=tagriviarray[1].strip
-		end
-	end
+        if len(tagriviarray) >= 3 and len( tagriviarray) <= 5:
+            self.kuvatHash[tagriviarray[0].strip()]=tagriviarray[1].strip()
+##    self.kuvatHash.keys()[:5]
 
-end
+##
+    def subscribe(self,state):
+        self.state = state
 
-def subscribe(state)
-@state = state
-end
 
-def lisaaTagi(tagi, tagirivi)
-if  @kuvatHash[@state.kuvatiedostolista[@state.indx]] == nil
-@kuvatHash[@state.kuvatiedostolista[@state.indx]]  = tagi
-tallennaTied($ohjelmapath+"/"+@luetteloTiedosto, tagirivi)
-elsif tagi != @kuvatHash[@state.kuvatiedostolista[@state.indx]]
-tallennaTied($ohjelmapath+"/"+@luetteloTiedosto, tagirivi)
-else
-puts "identtinen on jo"
-end
+    def lisaaTagi(self,tagi, tagirivi):
+        if self.state.kuvatiedostolista[self.state.indx] not in  self.kuvatHash.keys():
+            self.kuvatHash[self.state.kuvatiedostolista[self.state.indx]]  = tagi
+            tallennaTied(self.ohjelmapath+"/"+self.luetteloTiedosto, tagirivi)
+        elif tagi != self.kuvatHash[self.state.kuvatiedostolista[self.state.indx]]:
+            tallennaTied(self.ohjelmapath+"/"+self.luetteloTiedosto, tagirivi)
+        else:
+            print "identtinen on jo"
 
-end
-end
+
+
