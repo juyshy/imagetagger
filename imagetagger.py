@@ -13,6 +13,11 @@ from PIL import Image
 def get_date_taken(path):
     return Image.open(path)._getexif()[36867]
 
+def loadAFile(filename):
+    f = open(filename, 'r')
+    loadedFileContent=f.read()
+    f.close()
+    return loadedFileContent
 
 class MainWindow(QtGui.QMainWindow):
     def __init__(self,taglisting):
@@ -24,9 +29,10 @@ class MainWindow(QtGui.QMainWindow):
         self.taglisting = taglisting
         self.taglisting.subscribe(self)
 
-        self.autoNextPic=True
-
-        self.kuvakansio=r"E:\kuvat\137___08"
+##        self.autoNextPic=True
+##        self.listSubfolders=True
+##        self.kuvakansio=r"E:\kuvat\137___08"
+        self.readPrefs()
         os.chdir(self.kuvakansio)
         self.kuvatiedostolista=os.listdir(self.kuvakansio)
 
@@ -52,18 +58,37 @@ class MainWindow(QtGui.QMainWindow):
         self.indx=self.jumpToEmpty()
         self.loadImg()
 
+    def readPrefs(self):
+        prefs=loadAFile(".prefs")
+        prefsLines = prefs.split("\n")
+        prefsHash={}
+        for prfline in prefsLines:
+            prfkeyvaluepair= prfline.split("=")
+            prefsHash[prfkeyvaluepair[0]]=prfkeyvaluepair[1]
+
+        self.autoNextPic= prefsHash["autoNextPic"]== "True"
+        self.listSubfolders=prefsHash["listSubfolders"]== "True"
+        self.kuvakansio=prefsHash["kuvakansio"]
+        print self.autoNextPic
+        print self.listSubfolders
+        print self.kuvakansio
+
     def createActions(self):
-        self.newAct = QtGui.QAction("&New", self,
+        self.newAct = QtGui.QAction("&New taglisting", self,
                 shortcut=QtGui.QKeySequence.New,
-                statusTip="Create a new file", triggered=self.newFile)
+                statusTip="Create a new taglisting", triggered=self.newFile)
 
-        self.openAct = QtGui.QAction("&Open...", self,
+        self.openAct = QtGui.QAction("&Open taglisting", self,
                 shortcut=QtGui.QKeySequence.Open,
-                statusTip="Open an existing file", triggered=self.open)
+                statusTip="Open a taglisting", triggered=self.open)
 
-        self.saveAct = QtGui.QAction("&Save", self,
+        self.saveAct = QtGui.QAction("&Save taglisting", self,
                 shortcut=QtGui.QKeySequence.Save,
-                statusTip="Save the document to disk", triggered=self.save)
+                statusTip="Save taglisting", triggered=self.save)
+
+        self.chooseFolderAct = QtGui.QAction("&Choose Image folder", self,
+                shortcut=QtGui.QKeySequence("Ctrl+L"),
+                statusTip="Choose Image folder", triggered=self.chooseFolder)
 
         self.printAct = QtGui.QAction("&Print...", self,
                 shortcut=QtGui.QKeySequence.Print,
@@ -158,6 +183,8 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.newAct)
         self.fileMenu.addAction(self.openAct)
         self.fileMenu.addAction(self.saveAct)
+        self.fileMenu.addAction(self.chooseFolderAct)
+
         self.fileMenu.addAction(self.printAct)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAct)
@@ -187,6 +214,14 @@ class MainWindow(QtGui.QMainWindow):
         self.formatMenu.addAction(self.setLineSpacingAct)
         self.formatMenu.addAction(self.setParagraphSpacingAct)
 
+    def setExistingDirectory(self):
+        options = QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ShowDirsOnly
+        directory = QtGui.QFileDialog.getExistingDirectory(self,
+                "QFileDialog.getExistingDirectory()",
+                self.directoryLabel.text(), options)
+        if directory:
+            self.directoryLabel.setText(directory)
+
     def newFile(self):
         self.infoLabel.setText("Invoked <b>File|New</b>")
 
@@ -195,6 +230,10 @@ class MainWindow(QtGui.QMainWindow):
 
     def save(self):
         self.infoLabel.setText("Invoked <b>File|Save</b>")
+
+    def chooseFolder(self):
+        self.setExistingDirectory()
+        self.infoLabel.setText("Invoked <b>File|chooseFolder</b>")
 
     def print_(self):
         self.infoLabel.setText("Invoked <b>File|Print</b>")
@@ -271,6 +310,11 @@ class MainWindow(QtGui.QMainWindow):
         self.imageLabel = QtGui.QLabel()
         self.imageLabel.setBackgroundRole(QtGui.QPalette.Base)
         self.imageLabel.setSizePolicy(QtGui.QSizePolicy.Ignored,QtGui.QSizePolicy.Ignored)
+
+        frameStyle = QtGui.QFrame.Sunken | QtGui.QFrame.Panel
+        self.directoryLabel = QtGui.QLabel()
+        self.directoryLabel.setFrameStyle(frameStyle)
+        layout.addWidget(self.directoryLabel, 7, 1)
 ##        self.imageLabel.setScaledContents(True)
 
 ##        self.smallEditor = QtGui.QTextEdit()
@@ -285,8 +329,6 @@ class MainWindow(QtGui.QMainWindow):
         layout.setColumnStretch(1, 10)
         layout.setColumnStretch(2, 20)
         self.gridGroupBox.setLayout(layout)
-
-
 
 ##        self.loadImg()
 
@@ -317,11 +359,11 @@ class MainWindow(QtGui.QMainWindow):
             except:
                 tagiar= re.split(r'[, ]', tagii )
                 tageiar.append(tagii )
-            tagiar2=[tg.strip() for tg in tagiar]
+            tagiar2=[tg.strip() for tg in tagiar if tg.strip() !=""]
             tageiar += tagiar2
 
         tageiarunq=list( set( tageiar))
-        print tageiar
+##        print tageiar
         self.setCompleterValues(tageiarunq)
 
     def tiedostonLastMod(self,tiedosto):
@@ -332,7 +374,7 @@ class MainWindow(QtGui.QMainWindow):
 ##        print    os.stat(tiedosto).st_mtime
 ##         print datetime.fromtimestamp(os.stat(tiedosto).st_mtime)
 
-        get_date_taken(tiedosto)
+##        get_date_taken(tiedosto)
 
     def setCompleterValues(self,wordList):
 
