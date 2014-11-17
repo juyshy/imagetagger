@@ -5,16 +5,17 @@
 from PySide import QtCore, QtGui
 import os,sys,re
 from datetime import datetime
-sys.path.insert(0, r'E:\python\imagetagger')
+##sys.path.insert(0, r'E:\python\imagetagger')
 from taglistingmanager import TagListingManager
 
 from PIL import Image
+
 def get_date_taken(path):
     return Image.open(path)._getexif()[36867]
 
 class Dialog(QtGui.QDialog):
-    NumGridRows = 3
-    NumButtons = 4
+##    NumGridRows = 3
+##    NumButtons = 4
 
     def __init__(self,taglisting):
         super(Dialog, self).__init__()
@@ -28,6 +29,7 @@ class Dialog(QtGui.QDialog):
         self.kuvatiedostolista=os.listdir(self.kuvakansio)
         self.indx=0
         print self.kuvatiedostolista[self.indx]
+
         self.createGridGroupBox()
         mainLayout = QtGui.QVBoxLayout()
         mainLayout.addWidget(self.gridGroupBox)
@@ -184,21 +186,23 @@ class Dialog(QtGui.QDialog):
 
     def nextImage(self):
 ##        print "jee"
-        self.indx += 1
-        if self.indx > len(self.kuvatiedostolista) -1:
-            self.indx = 0
-        self.loadImg()
-        self.tagitlineEdit.setFocus()
-        self.tagitlineEdit.selectAll()
+        if self.kuvatiedostolista != []:
+            self.indx += 1
+            if self.indx > len(self.kuvatiedostolista) -1:
+                self.indx = 0
+            self.loadImg()
+            self.tagitlineEdit.setFocus()
+            self.tagitlineEdit.selectAll()
 
     def prevImage(self):
-        self.indx -= 1
-        if self.indx < 0:
-            self.indx = len(self.kuvatiedostolista) -1
+        if self.kuvatiedostolista != []:
+            self.indx -= 1
+            if self.indx < 0:
+                self.indx = len(self.kuvatiedostolista) -1
 
-        self.loadImg()
-        self.tagitlineEdit.setFocus()
-        self.tagitlineEdit.selectAll()
+            self.loadImg()
+            self.tagitlineEdit.setFocus()
+            self.tagitlineEdit.selectAll()
 
 if __name__ == '__main__':
 
