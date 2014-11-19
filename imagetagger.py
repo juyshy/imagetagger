@@ -29,15 +29,16 @@ class MainWindow(QtGui.QMainWindow):
         self.taglisting = taglisting
         self.taglisting.subscribe(self)
 
-##        self.autoNextPic=True
-##        self.listSubfolders=True
-##        self.kuvakansio=r"E:\kuvat\137___08"
+        self.autoNextPic=True
+        self.listSubfolders=True
+        self.kuvakansio=r"E:\kuvat\137___08"
         self.readPrefs()
+
         os.chdir(self.kuvakansio)
         self.kuvatiedostolista=os.listdir(self.kuvakansio)
 
         self.indx=0
-        print self.kuvatiedostolista[self.indx]
+##        print self.kuvatiedostolista[self.indx]
 
         self.createActions()
         self.createMenus()
@@ -87,7 +88,7 @@ class MainWindow(QtGui.QMainWindow):
                 statusTip="Save taglisting", triggered=self.save)
 
         self.chooseFolderAct = QtGui.QAction("&Choose Image folder", self,
-                shortcut=QtGui.QKeySequence("Ctrl+L"),
+                shortcut=QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_L),
                 statusTip="Choose Image folder", triggered=self.chooseFolder)
 
         self.printAct = QtGui.QAction("&Print...", self,
@@ -96,6 +97,10 @@ class MainWindow(QtGui.QMainWindow):
 
         self.exitAct = QtGui.QAction("E&xit", self, shortcut="Ctrl+Q",
                 statusTip="Exit the application", triggered=self.close)
+
+        self.jumpToIndexAct = QtGui.QAction("&Jump To Index", self,
+                shortcut=QtGui.QKeySequence("Ctrl+J"),
+                statusTip="Jump to index", triggered=self.jumpToIndex)
 
         self.undoAct = QtGui.QAction("&Undo", self,
                 shortcut=QtGui.QKeySequence.Undo,
@@ -198,21 +203,24 @@ class MainWindow(QtGui.QMainWindow):
         self.editMenu.addAction(self.pasteAct)
         self.editMenu.addSeparator()
 
+        self.imagesMenu = self.menuBar().addMenu("&Images")
+        self.imagesMenu.addAction(self.jumpToIndexAct)
+
         self.helpMenu = self.menuBar().addMenu("&Help")
         self.helpMenu.addAction(self.aboutAct)
         self.helpMenu.addAction(self.aboutQtAct)
 
-        self.formatMenu = self.editMenu.addMenu("&Format")
-        self.formatMenu.addAction(self.boldAct)
-        self.formatMenu.addAction(self.italicAct)
-        self.formatMenu.addSeparator().setText("Alignment")
-        self.formatMenu.addAction(self.leftAlignAct)
-        self.formatMenu.addAction(self.rightAlignAct)
-        self.formatMenu.addAction(self.justifyAct)
-        self.formatMenu.addAction(self.centerAct)
-        self.formatMenu.addSeparator()
-        self.formatMenu.addAction(self.setLineSpacingAct)
-        self.formatMenu.addAction(self.setParagraphSpacingAct)
+##        self.formatMenu = self.editMenu.addMenu("&Format")
+##        self.formatMenu.addAction(self.boldAct)
+##        self.formatMenu.addAction(self.italicAct)
+##        self.formatMenu.addSeparator().setText("Alignment")
+##        self.formatMenu.addAction(self.leftAlignAct)
+##        self.formatMenu.addAction(self.rightAlignAct)
+##        self.formatMenu.addAction(self.justifyAct)
+##        self.formatMenu.addAction(self.centerAct)
+##        self.formatMenu.addSeparator()
+##        self.formatMenu.addAction(self.setLineSpacingAct)
+##        self.formatMenu.addAction(self.setParagraphSpacingAct)
 
     def setExistingDirectory(self):
         options = QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ShowDirsOnly
@@ -240,6 +248,10 @@ class MainWindow(QtGui.QMainWindow):
 
     def undo(self):
         self.infoLabel.setText("Invoked <b>Edit|Undo</b>")
+
+    def jumpToIndex(self):
+        self.infoLabel.setText("Invoked <b>jump To Index</b>")
+
 
     def redo(self):
         self.infoLabel.setText("Invoked <b>Edit|Redo</b>")
@@ -292,20 +304,25 @@ class MainWindow(QtGui.QMainWindow):
         layout.setColumnMinimumWidth(1, 700)
         layout.setRowMinimumHeight(0, 500)
 ##        for i in range(Dialog.NumGridRows):
+
+        flkrbutton = QtGui.QPushButton("F&lickr"  )
+        flkrbutton.setFocusPolicy(QtCore.Qt.NoFocus)
+        layout.addWidget(flkrbutton, 1, 0)
+
         lbutton = QtGui.QPushButton("T&aakse"  )
         lbutton.setFocusPolicy(QtCore.Qt.NoFocus)
-        layout.addWidget(lbutton, 1, 0)
+        layout.addWidget(lbutton, 2, 0)
         rbutton = QtGui.QPushButton("E&teen"  )
         rbutton.setFocusPolicy(QtCore.Qt.NoFocus)
-        layout.addWidget(rbutton, 1, 5)
+        layout.addWidget(rbutton, 2, 5)
         tagitlabel = QtGui.QLabel("Tagit" )
         self.tagitlineEdit = QtGui.QLineEdit()
 
 
         self.tagitlineEdit.returnPressed.connect(self._lineedit_returnPressed)
 
-        layout.addWidget(tagitlabel, 6, 0)
-        layout.addWidget(self.tagitlineEdit, 6, 1)
+        layout.addWidget(tagitlabel, 7, 0)
+        layout.addWidget(self.tagitlineEdit, 7, 1)
 
         self.imageLabel = QtGui.QLabel()
         self.imageLabel.setBackgroundRole(QtGui.QPalette.Base)
@@ -314,18 +331,18 @@ class MainWindow(QtGui.QMainWindow):
         frameStyle = QtGui.QFrame.Sunken | QtGui.QFrame.Panel
         self.directoryLabel = QtGui.QLabel()
         self.directoryLabel.setFrameStyle(frameStyle)
-        layout.addWidget(self.directoryLabel, 7, 1)
+        layout.addWidget(self.directoryLabel, 8, 1)
 ##        self.imageLabel.setScaledContents(True)
 
 ##        self.smallEditor = QtGui.QTextEdit()
 ##        self.smallEditor.setPlainText("This widget takes up about two thirds "
 ##                "of the grid layout.")
 
-        layout.addWidget(self.imageLabel, 0, 1, 4, 4)
+        layout.addWidget(self.imageLabel, 0, 1, 5, 4)
 ##        layout.addWidget(self.smallEditor, 0, 1, 4, 4)
 
         self.infolabel = QtGui.QLabel()
-        layout.addWidget(self.infolabel, 5,1,1,2)
+        layout.addWidget(self.infolabel, 6,1,1,2)
         layout.setColumnStretch(1, 10)
         layout.setColumnStretch(2, 20)
         self.gridGroupBox.setLayout(layout)
@@ -461,6 +478,7 @@ if __name__ == '__main__':
     tagilistMangr= TagListingManager(ohjelmapath)
 ##    dialog = Dialog(tagilistMangr)
     window = MainWindow(tagilistMangr)
+
     window.show()
 
 
