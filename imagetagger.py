@@ -147,30 +147,30 @@ class MainWindow(QtGui.QMainWindow):
                 statusTip="Paste the clipboard's contents into the current selection",
                 triggered=self.paste)
 
-        self.boldAct = QtGui.QAction("&Bold", self, checkable=True,
-                shortcut="Ctrl+B", statusTip="Make the text bold",
-                triggered=self.bold)
-
-        boldFont = self.boldAct.font()
-        boldFont.setBold(True)
-        self.boldAct.setFont(boldFont)
-
-        self.italicAct = QtGui.QAction("&Italic", self, checkable=True,
-                shortcut="Ctrl+I", statusTip="Make the text italic",
-                triggered=self.italic)
-
-        italicFont = self.italicAct.font()
-        italicFont.setItalic(True)
-        self.italicAct.setFont(italicFont)
-
-        self.setLineSpacingAct = QtGui.QAction("Set &Line Spacing...", self,
-                statusTip="Change the gap between the lines of a paragraph",
-                triggered=self.setLineSpacing)
-
-        self.setParagraphSpacingAct = QtGui.QAction(
-                "Set &Paragraph Spacing...", self,
-                statusTip="Change the gap between paragraphs",
-                triggered=self.setParagraphSpacing)
+##        self.boldAct = QtGui.QAction("&Bold", self, checkable=True,
+##                shortcut="Ctrl+B", statusTip="Make the text bold",
+##                triggered=self.bold)
+##
+##        boldFont = self.boldAct.font()
+##        boldFont.setBold(True)
+##        self.boldAct.setFont(boldFont)
+##
+##        self.italicAct = QtGui.QAction("&Italic", self, checkable=True,
+##                shortcut="Ctrl+I", statusTip="Make the text italic",
+##                triggered=self.italic)
+##
+##        italicFont = self.italicAct.font()
+##        italicFont.setItalic(True)
+##        self.italicAct.setFont(italicFont)
+##
+##        self.setLineSpacingAct = QtGui.QAction("Set &Line Spacing...", self,
+##                statusTip="Change the gap between the lines of a paragraph",
+##                triggered=self.setLineSpacing)
+##
+##        self.setParagraphSpacingAct = QtGui.QAction(
+##                "Set &Paragraph Spacing...", self,
+##                statusTip="Change the gap between paragraphs",
+##                triggered=self.setParagraphSpacing)
 
         self.aboutAct = QtGui.QAction("&About", self,
                 statusTip="Show the application's About box",
@@ -181,29 +181,29 @@ class MainWindow(QtGui.QMainWindow):
                 triggered=self.aboutQt)
         self.aboutQtAct.triggered.connect(QtGui.qApp.aboutQt)
 
-        self.leftAlignAct = QtGui.QAction("&Left Align", self, checkable=True,
-                shortcut="Ctrl+L", statusTip="Left align the selected text",
-                triggered=self.leftAlign)
+##        self.leftAlignAct = QtGui.QAction("&Left Align", self, checkable=True,
+##                shortcut="Ctrl+L", statusTip="Left align the selected text",
+##                triggered=self.leftAlign)
+##
+##        self.rightAlignAct = QtGui.QAction("&Right Align", self,
+##                checkable=True, shortcut="Ctrl+R",
+##                statusTip="Right align the selected text",
+##                triggered=self.rightAlign)
+##
+##        self.justifyAct = QtGui.QAction("&Justify", self, checkable=True,
+##                shortcut="Ctrl+J", statusTip="Justify the selected text",
+##                triggered=self.justify)
+##
+##        self.centerAct = QtGui.QAction("&Center", self, checkable=True,
+##                shortcut="Ctrl+C", statusTip="Center the selected text",
+##                triggered=self.center)
 
-        self.rightAlignAct = QtGui.QAction("&Right Align", self,
-                checkable=True, shortcut="Ctrl+R",
-                statusTip="Right align the selected text",
-                triggered=self.rightAlign)
-
-        self.justifyAct = QtGui.QAction("&Justify", self, checkable=True,
-                shortcut="Ctrl+J", statusTip="Justify the selected text",
-                triggered=self.justify)
-
-        self.centerAct = QtGui.QAction("&Center", self, checkable=True,
-                shortcut="Ctrl+C", statusTip="Center the selected text",
-                triggered=self.center)
-
-        self.alignmentGroup = QtGui.QActionGroup(self)
-        self.alignmentGroup.addAction(self.leftAlignAct)
-        self.alignmentGroup.addAction(self.rightAlignAct)
-        self.alignmentGroup.addAction(self.justifyAct)
-        self.alignmentGroup.addAction(self.centerAct)
-        self.leftAlignAct.setChecked(True)
+##        self.alignmentGroup = QtGui.QActionGroup(self)
+##        self.alignmentGroup.addAction(self.leftAlignAct)
+##        self.alignmentGroup.addAction(self.rightAlignAct)
+##        self.alignmentGroup.addAction(self.justifyAct)
+##        self.alignmentGroup.addAction(self.centerAct)
+##        self.leftAlignAct.setChecked(True)
 
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu("&File")
@@ -305,30 +305,30 @@ class MainWindow(QtGui.QMainWindow):
 
     def paste(self):
         self.infoLabel.setText("Invoked <b>Edit|Paste</b>")
-
-    def bold(self):
-        self.infoLabel.setText("Invoked <b>Edit|Format|Bold</b>")
-
-    def italic(self):
-        self.infoLabel.setText("Invoked <b>Edit|Format|Italic</b>")
-
-    def leftAlign(self):
-        self.infoLabel.setText("Invoked <b>Edit|Format|Left Align</b>")
-
-    def rightAlign(self):
-        self.infoLabel.setText("Invoked <b>Edit|Format|Right Align</b>")
-
-    def justify(self):
-        self.infoLabel.setText("Invoked <b>Edit|Format|Justify</b>")
-
-    def center(self):
-        self.infoLabel.setText("Invoked <b>Edit|Format|Center</b>")
-
-    def setLineSpacing(self):
-        self.infoLabel.setText("Invoked <b>Edit|Format|Set Line Spacing</b>")
-
-    def setParagraphSpacing(self):
-        self.infoLabel.setText("Invoked <b>Edit|Format|Set Paragraph Spacing</b>")
+##
+##    def bold(self):
+##        self.infoLabel.setText("Invoked <b>Edit|Format|Bold</b>")
+##
+##    def italic(self):
+##        self.infoLabel.setText("Invoked <b>Edit|Format|Italic</b>")
+##
+##    def leftAlign(self):
+##        self.infoLabel.setText("Invoked <b>Edit|Format|Left Align</b>")
+##
+##    def rightAlign(self):
+##        self.infoLabel.setText("Invoked <b>Edit|Format|Right Align</b>")
+##
+##    def justify(self):
+##        self.infoLabel.setText("Invoked <b>Edit|Format|Justify</b>")
+##
+##    def center(self):
+##        self.infoLabel.setText("Invoked <b>Edit|Format|Center</b>")
+##
+##    def setLineSpacing(self):
+##        self.infoLabel.setText("Invoked <b>Edit|Format|Set Line Spacing</b>")
+##
+##    def setParagraphSpacing(self):
+##        self.infoLabel.setText("Invoked <b>Edit|Format|Set Paragraph Spacing</b>")
 
     def about(self):
         self.infoLabel.setText("Invoked <b>Help|About</b>")
