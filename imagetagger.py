@@ -19,6 +19,11 @@ def loadAFile(filename):
     f.close()
     return loadedFileContent
 
+def saveFile(tiednimi,sisalto):
+    f = open(tiednimi, 'w')
+    f.write(sisalto)
+    f.close()
+
 class MainWindow(QtGui.QMainWindow):
     def __init__(self,taglisting):
         super(MainWindow, self).__init__()
@@ -29,6 +34,10 @@ class MainWindow(QtGui.QMainWindow):
         self.taglisting = taglisting
         self.taglisting.subscribe(self)
 
+        pyappfilepath = os.path.realpath(__file__)
+##        print "pyappfilepath ",pyappfilepath
+        self.appDirectory = os.path.dirname(pyappfilepath)
+        print "appDirectory ", self.appDirectory
         self.autoNextPic=True
         self.listSubfolders=True
         self.kuvakansio=r"E:\kuvat\137___08"
@@ -40,6 +49,7 @@ class MainWindow(QtGui.QMainWindow):
         self.indx=0
 ##        print self.kuvatiedostolista[self.indx]
 
+        self.publishList=[]
         self.createActions()
         self.createMenus()
         self.createGridGroupBox()
@@ -54,7 +64,7 @@ class MainWindow(QtGui.QMainWindow):
         mainLayout.addWidget(self.gridGroupBox)
 ##        self.setLayout(mainLayout)
         widget.setLayout(mainLayout)
-        self.setWindowTitle("Basic Layouts")
+        self.setWindowTitle("ImageTagger")
         self.tagitlineEdit.setFocus()
         self.indx=self.jumpToEmpty()
         self.loadImg()
@@ -101,6 +111,18 @@ class MainWindow(QtGui.QMainWindow):
         self.jumpToIndexAct = QtGui.QAction("&Jump To Index", self,
                 shortcut=QtGui.QKeySequence("Ctrl+J"),
                 statusTip="Jump to index", triggered=self.jumpToIndex)
+
+        self.showPublishListAct = QtGui.QAction("&Show Publish List", self,
+                shortcut=QtGui.QKeySequence("Ctrl+U"),
+                statusTip="Show Publish List", triggered=self.showPublishList)
+
+        self.savePubListAct   = QtGui.QAction("&Save Publish List", self,
+                shortcut=QtGui.QKeySequence("Ctrl+Alt+S"),
+                statusTip="Show Publish List", triggered=self.savePubList)
+
+        self.clearPubListAct = QtGui.QAction("&Clear Publish List", self,
+                shortcut=QtGui.QKeySequence("Ctrl+Alt+C"),
+                statusTip="Clear Publish List", triggered=self.clearPubList)
 
         self.undoAct = QtGui.QAction("&Undo", self,
                 shortcut=QtGui.QKeySequence.Undo,
@@ -206,6 +228,12 @@ class MainWindow(QtGui.QMainWindow):
         self.imagesMenu = self.menuBar().addMenu("&Images")
         self.imagesMenu.addAction(self.jumpToIndexAct)
 
+        self.publishMenu = self.menuBar().addMenu("&Publish")
+        self.publishMenu.addAction(self.showPublishListAct)
+        self.publishMenu.addAction(self.savePubListAct)
+        self.publishMenu.addAction(self.clearPubListAct)
+
+
         self.helpMenu = self.menuBar().addMenu("&Help")
         self.helpMenu.addAction(self.aboutAct)
         self.helpMenu.addAction(self.aboutQtAct)
@@ -252,6 +280,19 @@ class MainWindow(QtGui.QMainWindow):
     def jumpToIndex(self):
         self.infoLabel.setText("Invoked <b>jump To Index</b>")
 
+    def showPublishList(self):
+        self.infoLabel.setText("Invoked <b>Show Publish List</b>")
+        print self.publishList
+
+    def savePubList(self):
+        self.infoLabel.setText("Invoked <b>Save Publish List</b>")
+        list2save= self.kuvakansio + "\n" + "\n".join(self.publishList)
+        tiednimi = self.appDirectory + "/" + "publishlist_" + "{0:%d-%m-%Y-%H-%M-%S}".format(datetime.now()) + ".txt"
+        saveFile(tiednimi, list2save)
+
+    def clearPubList(self):
+        self.infoLabel.setText("Invoked <b>Clear Publish List</b>")
+        self.publishList =[]
 
     def redo(self):
         self.infoLabel.setText("Invoked <b>Edit|Redo</b>")
@@ -298,6 +339,12 @@ class MainWindow(QtGui.QMainWindow):
     def aboutQt(self):
         self.infoLabel.setText("Invoked <b>Help|About Qt</b>")
 
+    def keyPressEvent(self, event):
+
+        if event.key() == QtCore.Qt.Key_Right:
+            print "OIKEANUOLI"
+             #) - (event.key() == QtCore.Qt.Key_Left)) % self.width
+
     def createGridGroupBox(self):
         self.gridGroupBox = QtGui.QGroupBox("Grid layout")
         layout = QtGui.QGridLayout()
@@ -305,14 +352,14 @@ class MainWindow(QtGui.QMainWindow):
         layout.setRowMinimumHeight(0, 500)
 ##        for i in range(Dialog.NumGridRows):
 
-        flkrbutton = QtGui.QPushButton("F&lickr"  )
+        flkrbutton = QtGui.QPushButton("P&ublish"  )
         flkrbutton.setFocusPolicy(QtCore.Qt.NoFocus)
         layout.addWidget(flkrbutton, 1, 0)
 
-        lbutton = QtGui.QPushButton("T&aakse"  )
+        lbutton = QtGui.QPushButton("P&revious"  )
         lbutton.setFocusPolicy(QtCore.Qt.NoFocus)
         layout.addWidget(lbutton, 2, 0)
-        rbutton = QtGui.QPushButton("E&teen"  )
+        rbutton = QtGui.QPushButton("Nex&t"  )
         rbutton.setFocusPolicy(QtCore.Qt.NoFocus)
         layout.addWidget(rbutton, 2, 5)
         tagitlabel = QtGui.QLabel("Tagit" )
@@ -351,6 +398,7 @@ class MainWindow(QtGui.QMainWindow):
 
         rbutton.clicked.connect(self.nextImage)
         lbutton.clicked.connect(self.prevImage)
+        flkrbutton.clicked.connect(self.addToPublishList)
 ##        wordList = ["alpha", "omega", "omicron", "zeta"]
         self.setCompleterList()
 
@@ -468,6 +516,11 @@ class MainWindow(QtGui.QMainWindow):
             self.loadImg()
             self.tagitlineEdit.setFocus()
             self.tagitlineEdit.selectAll()
+
+    def addToPublishList(self):
+        self.publishList.append(self.kuvatiedostolista[self.indx])
+        print "added: ",self.kuvatiedostolista[self.indx]
+
 
 if __name__ == '__main__':
 
