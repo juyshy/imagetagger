@@ -3,6 +3,7 @@
 """PyQt4 port of the layouts/basiclayout example from Qt v4.x"""
 
 from PySide import QtCore, QtGui
+import shutil
 import os,sys,re
 from datetime import datetime
 ##sys.path.insert(0, r'E:\python\imagetagger')
@@ -38,6 +39,8 @@ class MainWindow(QtGui.QMainWindow):
 ##        print "pyappfilepath ",pyappfilepath
         self.appDirectory = os.path.dirname(pyappfilepath)
         print "appDirectory ", self.appDirectory
+
+        self.temppubfolder="temp_publish_folder"
         self.autoNextPic=True
         self.listSubfolders=True
         self.kuvakansio=r"E:\kuvat\137___08"
@@ -112,6 +115,10 @@ class MainWindow(QtGui.QMainWindow):
                 shortcut=QtGui.QKeySequence("Ctrl+J"),
                 statusTip="Jump to index", triggered=self.jumpToIndex)
 
+        self.loadPublishListAct = QtGui.QAction("&Load Publish List", self,
+                shortcut=QtGui.QKeySequence("Ctrl+Alt+O"),
+                statusTip="Load Publish List", triggered=self.loadPublishList)
+
         self.showPublishListAct = QtGui.QAction("&Show Publish List", self,
                 shortcut=QtGui.QKeySequence("Ctrl+U"),
                 statusTip="Show Publish List", triggered=self.showPublishList)
@@ -120,8 +127,12 @@ class MainWindow(QtGui.QMainWindow):
                 shortcut=QtGui.QKeySequence("Ctrl+Alt+S"),
                 statusTip="Show Publish List", triggered=self.savePubList)
 
-        self.clearPubListAct = QtGui.QAction("&Clear Publish List", self,
+        self.copyPublishIMagesToTempFolderAct = QtGui.QAction("&Copy Images To Temp Folder", self,
                 shortcut=QtGui.QKeySequence("Ctrl+Alt+C"),
+                statusTip="Copy Images To Temp Folder", triggered=self.copyPublishIMagesToTempFolder)
+
+        self.clearPubListAct = QtGui.QAction("&Clear Publish List", self,
+                shortcut=QtGui.QKeySequence("Ctrl+Alt+R"),
                 statusTip="Clear Publish List", triggered=self.clearPubList)
 
         self.undoAct = QtGui.QAction("&Undo", self,
@@ -229,10 +240,14 @@ class MainWindow(QtGui.QMainWindow):
         self.imagesMenu.addAction(self.jumpToIndexAct)
 
         self.publishMenu = self.menuBar().addMenu("&Publish")
+
+        self.publishMenu.addAction(self.loadPublishListAct)
         self.publishMenu.addAction(self.showPublishListAct)
         self.publishMenu.addAction(self.savePubListAct)
+        self.publishMenu.addAction(self.copyPublishIMagesToTempFolderAct)
         self.publishMenu.addAction(self.clearPubListAct)
 
+##temp_publish_folder
 
         self.helpMenu = self.menuBar().addMenu("&Help")
         self.helpMenu.addAction(self.aboutAct)
@@ -280,6 +295,9 @@ class MainWindow(QtGui.QMainWindow):
     def jumpToIndex(self):
         self.infoLabel.setText("Invoked <b>jump To Index</b>")
 
+    def loadPublishList(self):
+        self.infoLabel.setText("Invoked <b>Load Publish List</b>")
+
     def showPublishList(self):
         self.infoLabel.setText("Invoked <b>Show Publish List</b>")
         print self.publishList
@@ -287,8 +305,16 @@ class MainWindow(QtGui.QMainWindow):
     def savePubList(self):
         self.infoLabel.setText("Invoked <b>Save Publish List</b>")
         list2save= self.kuvakansio + "\n" + "\n".join(self.publishList)
-        tiednimi = self.appDirectory + "/" + "publishlist_" + "{0:%d-%m-%Y-%H-%M-%S}".format(datetime.now()) + ".txt"
+        tiednimi = self.appDirectory + "/publists/" + "publishlist_" + "{0:%d-%m-%Y-%H-%M-%S}".format(datetime.now()) + ".txt"
         saveFile(tiednimi, list2save)
+
+    def copyPublishIMagesToTempFolder(self):
+        self.infoLabel.setText("Invoked <b>Copy Publish IMages To Temp Folder</b>")
+        for kuva in self.publishList:
+            src = self.kuvakansio + "/" + kuva
+            dest=self.appDirectory + "/" + self.temppubfolder +"/" + kuva
+            print "copy: ", src , dest
+            shutil.copy2( src , dest)
 
     def clearPubList(self):
         self.infoLabel.setText("Invoked <b>Clear Publish List</b>")

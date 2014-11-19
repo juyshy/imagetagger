@@ -2,3 +2,4 @@ tagiluettelo*
 *.pyc
 .prefs
 publishlist*.txt
+temp_publish_folder/
