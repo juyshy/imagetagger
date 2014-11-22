@@ -61,6 +61,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.taglisting = taglisting
         self.taglisting.subscribe(self)
+        self.debug = False
         self.debugLog = ""
         self.debugLogFile = "debuglogi.txt"
         handcursor= QtGui.QCursor(QtCore.Qt.OpenHandCursor)
@@ -99,7 +100,8 @@ class MainWindow(QtGui.QMainWindow):
         self.tagitlineEdit.setFocus()
         self.debugLog += self.taglisting.debugLog
         self.indx=self.jumpToEmpty()
-        saveFile(self.appDirectory + "\\" + self.debugLogFile, self.debugLog)
+        if self.debug:
+            saveFile(self.appDirectory + "\\" + self.debugLogFile, self.debugLog)
 
         self.loadImg()
 
@@ -439,7 +441,7 @@ class MainWindow(QtGui.QMainWindow):
         dbutton = QtGui.QPushButton("&Delete"  )
         dbutton.setFocusPolicy(QtCore.Qt.NoFocus)
         vbox.addWidget(dbutton)
-        unsharpbutton = QtGui.QPushButton("Uns&harp"  )
+        unsharpbutton = QtGui.QPushButton("U&nsharp"  )
         unsharpbutton.setFocusPolicy(QtCore.Qt.NoFocus)
         vbox.addWidget(unsharpbutton)
 
@@ -459,6 +461,16 @@ class MainWindow(QtGui.QMainWindow):
         rbutton = QtGui.QPushButton("Nex&t"  )
         rbutton.setFocusPolicy(QtCore.Qt.NoFocus)
         layout.addWidget(rbutton, 2, 5)
+
+
+        dbutton.clicked.connect(self.markForDelete)
+        unsharpbutton.clicked.connect(self.labelAsUnsharp)
+        rbutton.clicked.connect(self.nextImage)
+
+        lbutton.clicked.connect(self.prevImage)
+        flkrbutton.clicked.connect(self.addToPublishList)
+
+
         tagitlabel = QtGui.QLabel("Search tags" )
         self.tagitlineEdit = QtGui.QLineEdit()
 
@@ -504,9 +516,7 @@ class MainWindow(QtGui.QMainWindow):
 
 ##        self.loadImg()
 
-        rbutton.clicked.connect(self.nextImage)
-        lbutton.clicked.connect(self.prevImage)
-        flkrbutton.clicked.connect(self.addToPublishList)
+
 ##        wordList = ["alpha", "omega", "omicron", "zeta"]
         self.setCompleterList()
 
@@ -518,7 +528,8 @@ class MainWindow(QtGui.QMainWindow):
         self.debugLog += "kuvatiedostolista: \n"
         for i, kuva in enumerate( self.kuvatiedostolista):
 ##            print kuva
-            self.debugLog += kuva + "\n"
+            if self.debug:
+                self.debugLog += kuva + "\n"
             if kuva in self.taglisting.kuvatHash.keys():
                 self.tagattyLukumaara +=1
         if self.tagattyLukumaara < len(self.kuvatiedostolista):
@@ -579,7 +590,10 @@ class MainWindow(QtGui.QMainWindow):
         self.taglisting.lisaaTagi(self.tagitlineEdit.text(), tagirivi)
         self.lastTagi=self.tagitlineEdit.text()
         self.setCompleterList()
-        self.tagitlineEdit.setText( self.lastTagi)
+        self.tagitlineEdit.setText( self.lastTagi.replace(",UNSHARP","").replace(",DELETE",""))
+        self.titlelineEdit.setText("")
+        self.ptagitlineEdit.setText("")
+
         if self.autoNextPic:
             self.nextImage()
 
@@ -614,6 +628,16 @@ class MainWindow(QtGui.QMainWindow):
         self.imageLabel.setPixmap(pxmap)
 
 ##        self.scaleFactor = 0.5
+
+    def appendToTags(self,tagtxt):
+##        self.tagitlineEdit.text()
+        self.tagitlineEdit.setText(  self.tagitlineEdit.text() +"," + tagtxt)
+
+    def markForDelete(self):
+        self.appendToTags("DELETE")
+
+    def labelAsUnsharp(self):
+        self.appendToTags("UNSHARP")
 
     def nextImage(self):
 ##        print "jee"
