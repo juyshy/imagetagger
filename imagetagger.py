@@ -32,6 +32,42 @@ def getVolSerial():
     hdvolserial =re.findall(r'Volume Serial Number is (.*?)\r\n', cmdinfo[:130])[0]
     return hdvolserial
 
+class ImageInfo(Object):
+    def __init__(self,fullpath,infoSource = 'harddrive'):
+        self.filename = os.path.dirname(fullpath)
+        self.fullpath = fullpath
+        self.folderpath = os.path.dirname(fullpath)
+        self.size = None
+        self.lastModTime= None
+        self.picTaken= None
+        self.tags= None
+        self.title= None
+        self.pubtags= None
+        self.pixelSize= None
+        self.storageVolserial = None
+
+        self.unsharp = False
+        self.pendingDelete = False
+        self.infoSource = infoSource
+        if  self.infoSource == 'harddrive':
+            self.scanMetadata()
+
+
+        def scanMetadata(self):
+            try:
+                self.size=os.path.getsize(self.fullpath )
+            except:
+                pass
+
+            try:
+                self.lastModTime=os.path.getmtime(self.fullpath )
+            except:
+                pass
+
+            try:
+                self.picTaken =  get_date_taken(path)
+            except:
+                pass
 
 
 class HoverLabel(QtGui.QLabel):
@@ -282,8 +318,10 @@ class MainWindow(QtGui.QMainWindow):
                 QtCore.QDir.home().dirName())
         if ok and text != '':
             print text
+            self.kuvatiedostolista = []
             for kuva in self.taglisting.kuvatHash.keys():
                 if text in self.taglisting.kuvatHash[kuva].decode("utf-8"):
+##                    self.kuvatiedostolista
                     pass
 ##                    self.textLabel.setText(text)
 
