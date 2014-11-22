@@ -32,6 +32,8 @@ def getVolSerial():
     hdvolserial =re.findall(r'Volume Serial Number is (.*?)\r\n', cmdinfo[:130])[0]
     return hdvolserial
 
+
+
 class HoverLabel(QtGui.QLabel):
     def __init__(self, parent=None):
         super(HoverLabel, self).__init__(parent)
@@ -65,6 +67,8 @@ class MainWindow(QtGui.QMainWindow):
         self.debug = False
         self.debugLog = ""
         self.debugLogFile = "debuglogi.txt"
+
+        self.imgFileExtensionsRgx = r'\,(jpg)|(JPG)|(PNG)|(png)'
         handcursor= QtGui.QCursor(QtCore.Qt.OpenHandCursor)
 ##        self.setCursor(cursor)
         pyappfilepath = os.path.realpath(__file__)
@@ -115,8 +119,8 @@ class MainWindow(QtGui.QMainWindow):
         else:
             os.chdir(self.kuvakansio)
             tiedostotkansiossa= os.listdir(self.kuvakansio)
-            self.imgFileExtensionsRgx = r'\,(jpg)|(JPG)|(PNG)|(png)'
-            kuvatiedostot=[tiedsto for tiedsto in tiedostotkansiossa if re.findall(self.imgFileExtensionsRgx, tiedsto[-5:]) !=[] ]
+
+            kuvatiedostot=[self.kuvakansio +"\\" + tiedsto for tiedsto in tiedostotkansiossa if re.findall(self.imgFileExtensionsRgx, tiedsto[-5:]) !=[] ]
             self.kuvatiedostolista=kuvatiedostot
         self.volserial= getVolSerial()
         self.indx=0
@@ -163,6 +167,12 @@ class MainWindow(QtGui.QMainWindow):
         self.jumpToIndexAct = QtGui.QAction("&Jump To Index", self,
                 shortcut=QtGui.QKeySequence("Ctrl+J"),
                 statusTip="Jump to index", triggered=self.jumpToIndex)
+
+        self.loadListByTagsAct = QtGui.QAction("Load imagelist By &Tag", self,
+                shortcut=QtGui.QKeySequence("Ctrl+T"),
+                statusTip="Load imagelist By Tag", triggered=self.loadImageListWithTag)
+
+
 
         self.loadPublishListAct = QtGui.QAction("&Load Publish List", self,
                 shortcut=QtGui.QKeySequence("Ctrl+Alt+O"),
@@ -265,6 +275,18 @@ class MainWindow(QtGui.QMainWindow):
 ##        self.alignmentGroup.addAction(self.centerAct)
 ##        self.leftAlignAct.setChecked(True)
 
+
+    def loadImageListWithTag(self):
+        text, ok = QtGui.QInputDialog.getText(self, "Load imagelist with tag",
+                "tag:", QtGui.QLineEdit.Normal,
+                QtCore.QDir.home().dirName())
+        if ok and text != '':
+            print text
+            for kuva in self.taglisting.kuvatHash.keys():
+                if text in self.taglisting.kuvatHash[kuva].decode("utf-8"):
+                    pass
+##                    self.textLabel.setText(text)
+
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu("&File")
         self.fileMenu.addAction(self.newAct)
@@ -287,6 +309,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.imagesMenu = self.menuBar().addMenu("&Images")
         self.imagesMenu.addAction(self.jumpToIndexAct)
+        self.imagesMenu.addAction(self.loadListByTagsAct)
 
         self.publishMenu = self.menuBar().addMenu("&Publish")
 
@@ -528,8 +551,9 @@ class MainWindow(QtGui.QMainWindow):
             self.debugLog += "\nkuvatHash.keys()\n"
             self.debugLog += "\n".join(self.taglisting.kuvatHash.keys()).encode("utf-8") +"\n\n"
             self.debugLog += "kuvatiedostolista: \n"
-        for i, kuva in enumerate( self.kuvatiedostolista):
+        for i, kuva1 in enumerate( self.kuvatiedostolista):
 ##            print kuva
+            kuva=os.path.basename(kuva1)
             if self.debug:
                 self.debugLog += kuva + "\n"
             if kuva in self.taglisting.kuvatHash.keys():
@@ -538,7 +562,8 @@ class MainWindow(QtGui.QMainWindow):
     def jumpToUntagged(self):
         self.lasketagattyjenLukumaara()
         if self.tagattyLukumaara < len(self.kuvatiedostolista):
-            for i, kuva in enumerate( self.kuvatiedostolista):
+            for i, kuva1 in enumerate( self.kuvatiedostolista):
+                kuva=os.path.basename(kuva1)
                 if kuva not in self.taglisting.kuvatHash.keys():
                     break
             self.indx=i
@@ -631,11 +656,12 @@ class MainWindow(QtGui.QMainWindow):
         self.pixkoko= str(pixkokoz[0])+"X"+str(pixkokoz[1])
         pxmap = QtGui.QPixmap.fromImage(image)
         pxmap=pxmap.scaledToHeight(550)
-        if unicode( self.kuvatiedostolista[self.indx]) in self.taglisting.kuvatHash.keys() :  #jos kuva on jo luettelossa
+        kuva=os.path.basename(self.kuvatiedostolista[self.indx])
+        if unicode( kuva) in self.taglisting.kuvatHash.keys() :  #jos kuva on jo luettelossa
             try:
-                self.tagitlineEdit.setText( self.taglisting.kuvatHash[self.kuvatiedostolista[self.indx]].decode("utf-8"))
+                self.tagitlineEdit.setText( self.taglisting.kuvatHash[kuva].decode("utf-8"))
             except:
-                self.tagitlineEdit.setText( self.taglisting.kuvatHash[self.kuvatiedostolista[self.indx]])
+                self.tagitlineEdit.setText( self.taglisting.kuvatHash[kuva])
 ##        else:
 ##            self.tagitlineEdit.setText("")
         self.imageLabel.setPixmap(pxmap)
