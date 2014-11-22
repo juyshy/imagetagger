@@ -32,7 +32,25 @@ def getVolSerial():
     hdvolserial =re.findall(r'Volume Serial Number is (.*?)\r\n', cmdinfo[:130])[0]
     return hdvolserial
 
+class HoverLabel(QtGui.QLabel):
+    def __init__(self, parent=None):
+        super(HoverLabel, self).__init__(parent)
+        self.setMouseTracking(True)
+##        self.setAcceptsHoverEvents(True)
+##        self.oldpos = QtCore.QPoint(0, 0)
 
+##    def hoverEnterEvent(self, event):
+##        print "hoverEnterEvent"
+##
+##    def hoverLeaveEvent(self, event):
+##        print "hoverLeaveEvent"
+
+    def mouseMoveEvent(self, event):
+
+        widgetPosition = self.mapFromGlobal(event.globalPos())
+##        hovere= QtGui.QHoverEvent(QtCore.QEvent.HoverLeave,widgetPosition, self.oldpos )
+##        self.oldpos  = widgetPosition
+##        print widgetPosition
 
 class MainWindow(QtGui.QMainWindow):
     def __init__(self,taglisting):
@@ -43,7 +61,10 @@ class MainWindow(QtGui.QMainWindow):
 
         self.taglisting = taglisting
         self.taglisting.subscribe(self)
-
+        self.debugLog = ""
+        self.debugLogFile = "debuglogi.txt"
+        handcursor= QtGui.QCursor(QtCore.Qt.OpenHandCursor)
+##        self.setCursor(cursor)
         pyappfilepath = os.path.realpath(__file__)
 ##        print "pyappfilepath ",pyappfilepath
         self.appDirectory = os.path.dirname(pyappfilepath)
@@ -52,7 +73,7 @@ class MainWindow(QtGui.QMainWindow):
         self.temppubfolder="temp_publish_folder"
         self.autoNextPic=True
         self.listSubfolders=True
-        self.kuvakansio=r"E:\kuvat\137___08"
+        self.kuvakansio=r"i:\kuvat"
         self.readPrefs()
 
         self.scanImagesFolder()
@@ -76,8 +97,9 @@ class MainWindow(QtGui.QMainWindow):
         widget.setLayout(mainLayout)
         self.setWindowTitle("ImageTagger")
         self.tagitlineEdit.setFocus()
+        self.debugLog += self.taglisting.debugLog
         self.indx=self.jumpToEmpty()
-
+        saveFile(self.appDirectory + "\\" + self.debugLogFile, self.debugLog)
 
         self.loadImg()
 
@@ -89,7 +111,10 @@ class MainWindow(QtGui.QMainWindow):
             self.scanWithSubfolders()
         else:
             os.chdir(self.kuvakansio)
-            self.kuvatiedostolista=os.listdir(self.kuvakansio)
+            tiedostotkansiossa= os.listdir(self.kuvakansio)
+            self.imgFileExtensionsRgx = r'\,(jpg)|(JPG)|(PNG)|(png)'
+            kuvatiedostot=[tiedsto for tiedsto in tiedostotkansiossa if re.findall(self.imgFileExtensionsRgx, tiedsto[-5:]) !=[] ]
+            self.kuvatiedostolista=kuvatiedostot
         self.volserial= getVolSerial()
         self.indx=0
 
@@ -290,9 +315,9 @@ class MainWindow(QtGui.QMainWindow):
         options = QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ShowDirsOnly
         directory = QtGui.QFileDialog.getExistingDirectory(self,
                 "Choose images folder",
-                self.directoryLabel.text(), options)
+                "popop", options)
         if directory:
-            self.directoryLabel.setText(directory)
+##            self.directoryLabel.setText(directory)
             self.kuvakansio = directory
             self.scanImagesFolder()
             self.tagitlineEdit.setFocus()
@@ -300,12 +325,15 @@ class MainWindow(QtGui.QMainWindow):
             self.indx=self.jumpToEmpty()
             print "self.indx " ,self.indx
             self.loadImg()
+            self.tagitlineEdit.selectAll()
 
     def newFile(self):
         self.infoLabel.setText("Invoked <b>File|New</b>")
 
     def open(self):
         self.infoLabel.setText("Invoked <b>File|Open</b>")
+        print self.appDirectory + "\\" + self.taglisting.luetteloTiedosto
+        os.system(self.appDirectory + "\\" + self.taglisting.luetteloTiedosto)
 
     def save(self):
         self.infoLabel.setText("Invoked <b>File|Save</b>")
@@ -403,36 +431,62 @@ class MainWindow(QtGui.QMainWindow):
         self.gridGroupBox = QtGui.QGroupBox("Grid layout")
         layout = QtGui.QGridLayout()
         layout.setColumnMinimumWidth(1, 700)
-        layout.setRowMinimumHeight(0, 500)
+        layout.setRowMinimumHeight(0, 400)
 ##        for i in range(Dialog.NumGridRows):
+
+        vbox = QtGui.QVBoxLayout(self)
+
+        dbutton = QtGui.QPushButton("&Delete"  )
+        dbutton.setFocusPolicy(QtCore.Qt.NoFocus)
+        vbox.addWidget(dbutton)
+        unsharpbutton = QtGui.QPushButton("Uns&harp"  )
+        unsharpbutton.setFocusPolicy(QtCore.Qt.NoFocus)
+        vbox.addWidget(unsharpbutton)
 
         flkrbutton = QtGui.QPushButton("P&ublish"  )
         flkrbutton.setFocusPolicy(QtCore.Qt.NoFocus)
-        layout.addWidget(flkrbutton, 1, 0)
+        vbox.addWidget(flkrbutton)
 
         lbutton = QtGui.QPushButton("P&revious"  )
         lbutton.setFocusPolicy(QtCore.Qt.NoFocus)
-        layout.addWidget(lbutton, 2, 0)
+        vbox.addWidget(lbutton)
+##        vbox.addSpacing(120)
+        vbox.insertSpacing(1,20)
+
+        layout.addLayout(vbox, 1, 0)
+##        layout.addWidget(lbutton, 2, 0)
+
         rbutton = QtGui.QPushButton("Nex&t"  )
         rbutton.setFocusPolicy(QtCore.Qt.NoFocus)
         layout.addWidget(rbutton, 2, 5)
-        tagitlabel = QtGui.QLabel("Tagit" )
+        tagitlabel = QtGui.QLabel("Search tags" )
         self.tagitlineEdit = QtGui.QLineEdit()
-
 
         self.tagitlineEdit.returnPressed.connect(self._lineedit_returnPressed)
 
         layout.addWidget(tagitlabel, 7, 0)
         layout.addWidget(self.tagitlineEdit, 7, 1)
 
-        self.imageLabel = QtGui.QLabel()
+        self.imageLabel = HoverLabel()
         self.imageLabel.setBackgroundRole(QtGui.QPalette.Base)
         self.imageLabel.setSizePolicy(QtGui.QSizePolicy.Ignored,QtGui.QSizePolicy.Ignored)
 
         frameStyle = QtGui.QFrame.Sunken | QtGui.QFrame.Panel
-        self.directoryLabel = QtGui.QLabel()
-        self.directoryLabel.setFrameStyle(frameStyle)
-        layout.addWidget(self.directoryLabel, 8, 1)
+        #self.directoryLabel = QtGui.QLabel()
+        #self.directoryLabel.setFrameStyle(frameStyle)
+        #layout.addWidget(self.directoryLabel, 8, 1)
+
+        titlelabel = QtGui.QLabel("Title" )
+        self.titlelineEdit = QtGui.QLineEdit()
+        layout.addWidget(titlelabel, 8, 0)
+        layout.addWidget(self.titlelineEdit, 8, 1)
+        self.titlelineEdit.returnPressed.connect(self._lineedit_returnPressed)
+
+        ptagitlabel = QtGui.QLabel("Publish tags" )
+        self.ptagitlineEdit = QtGui.QLineEdit()
+        layout.addWidget(ptagitlabel, 9, 0)
+        layout.addWidget(self.ptagitlineEdit, 9, 1)
+        self.ptagitlineEdit.returnPressed.connect(self._lineedit_returnPressed)
 ##        self.imageLabel.setScaledContents(True)
 
 ##        self.smallEditor = QtGui.QTextEdit()
@@ -458,7 +512,13 @@ class MainWindow(QtGui.QMainWindow):
 
     def jumpToEmpty(self):
         self.tagattyLukumaara=0
+##        print self.taglisting.kuvatHash.keys()
+        self.debugLog += "\nkuvatHash.keys()\n"
+        self.debugLog += "\n".join(self.taglisting.kuvatHash.keys()).encode("utf-8") +"\n\n"
+        self.debugLog += "kuvatiedostolista: \n"
         for i, kuva in enumerate( self.kuvatiedostolista):
+##            print kuva
+            self.debugLog += kuva + "\n"
             if kuva in self.taglisting.kuvatHash.keys():
                 self.tagattyLukumaara +=1
         if self.tagattyLukumaara < len(self.kuvatiedostolista):
@@ -509,12 +569,12 @@ class MainWindow(QtGui.QMainWindow):
         print date_taken
         time =  self.tiedostonLastMod(tiedosto)
         print time
-        koko = str(os.stat(tiedosto).st_size  / 1000 ) + "kb"
+        koko = str(os.stat(tiedosto).st_size)#  / 1000 ) + "kb"
         koko
-        tagirivi = self.kuvatiedostolista[self.indx]+" | "+ self.tagitlineEdit.text() +" | "+ date_taken + " " + time+" "+self.pixkoko+" "+koko+" | "
-
         timenowstr= "{0:%d.%m.%Y %H:%M:%S}".format(datetime.now())
-        tagirivi += self.kuvakansio +" | tagd: " + timenowstr + " | volserial: " + self.volserial +"\n"
+        tagirivi = self.kuvatiedostolista[self.indx]+" | "+ self.tagitlineEdit.text() +" | "+ date_taken + " " + time+" "+self.pixkoko+" "+koko+" | "
+        tagirivi += self.kuvakansio +" | tagd: " + timenowstr + " | volserial: " + self.volserial
+        tagirivi += " | title: " + self.titlelineEdit.text()  + " | pubtags: " + self.ptagitlineEdit.text() +"\n"
         print tagirivi
         self.taglisting.lisaaTagi(self.tagitlineEdit.text(), tagirivi)
         self.lastTagi=self.tagitlineEdit.text()
@@ -530,6 +590,7 @@ class MainWindow(QtGui.QMainWindow):
         infotxt += "    " + str(self.indx+1) +"/" + str( len(self.kuvatiedostolista))
         infotxt += "    otettu: " +  get_date_taken(fileName)
         infotxt += "    tagatty: " +  str(self.tagattyLukumaara) +"/" + str( len(self.kuvatiedostolista))
+
         self.infolabel.setText(infotxt)
         image = QtGui.QImage(fileName)
         if image.isNull():
@@ -542,7 +603,7 @@ class MainWindow(QtGui.QMainWindow):
         pixkokoz=size.width(), size.height()
         self.pixkoko= str(pixkokoz[0])+"X"+str(pixkokoz[1])
         pxmap = QtGui.QPixmap.fromImage(image)
-        pxmap=pxmap.scaledToHeight(600)
+        pxmap=pxmap.scaledToHeight(550)
         if unicode( self.kuvatiedostolista[self.indx]) in self.taglisting.kuvatHash.keys() :  #jos kuva on jo luettelossa
             try:
                 self.tagitlineEdit.setText( self.taglisting.kuvatHash[self.kuvatiedostolista[self.indx]].decode("utf-8"))
@@ -588,8 +649,17 @@ if __name__ == '__main__':
     tagilistMangr= TagListingManager(ohjelmapath)
 ##    dialog = Dialog(tagilistMangr)
     window = MainWindow(tagilistMangr)
-
+    desktoppi= app.desktop()
+    screengeom= desktoppi.screenGeometry()
+    print "screenGeometry w ", screengeom.width()
+    screenWidth = screengeom.width()
+    screenHeight = screengeom.height()
     window.show()
+    width= window.height()
+    height = window.width()
+##    print (screenWidth/2)-(width/2),(screenHeight/2)-(height/2),width,height
+    window.setGeometry(40,30, 900, 700)
+##    window.setGeometry((screenWidth/2)-(width/2),(screenHeight/2)-(height/2),width,height)
 
 
     sys.exit(app.exec_())

@@ -44,7 +44,7 @@ class TagListingManager(object):
         self.luontikaneetti = "uusi tagi lista luotu: "
         self.sarakkeidenselitys = "tiedostonimi | tagit | kuvatiedoston last modified kuvapixelikoko kuvatiedosto koko | sijaintikansio | tagirivin luontihetki"
         self.state = None
-
+        self.debugLog = ""
         kuvalistaus = lataaTiedosto(self.ohjelmapath+"/"+self.luetteloTiedosto)
         kuvalistaus[:200]
         kuvalistausArr = kuvalistaus.split("\n")
@@ -57,12 +57,13 @@ class TagListingManager(object):
         if selitysrivinalku in kuvalistausArr[0]:
             kuvalistausArr.pop(0)
             print "kuvalistausArr[0] ",kuvalistausArr[0]
-
+        print "len(kuvalistausArr) ",len(kuvalistausArr)
         for i in range(len(kuvalistausArr)):
             tagriviarray=kuvalistausArr[i].split("|")
             #puts tagriviarray.size
-            if len(tagriviarray) >= 3 and len( tagriviarray) <= 5:
+            if len(tagriviarray) >= 3 :#and len( tagriviarray) <= 5:
                 self.kuvatHash[unicode( tagriviarray[0].strip().decode("utf-8"))]=tagriviarray[1].strip()
+                self.debugLog += tagriviarray[0].strip() +": " + tagriviarray[1].strip() + "\n"
 ##        self.setCompleterList()
 ##    self.kuvatHash.keys()[:5]
 
