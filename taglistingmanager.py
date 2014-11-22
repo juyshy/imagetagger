@@ -62,7 +62,7 @@ class TagListingManager(object):
             tagriviarray=kuvalistausArr[i].split("|")
             #puts tagriviarray.size
             if len(tagriviarray) >= 3 and len( tagriviarray) <= 5:
-                self.kuvatHash[tagriviarray[0].strip()]=tagriviarray[1].strip()
+                self.kuvatHash[unicode( tagriviarray[0].strip().decode("utf-8"))]=tagriviarray[1].strip()
 ##        self.setCompleterList()
 ##    self.kuvatHash.keys()[:5]
 

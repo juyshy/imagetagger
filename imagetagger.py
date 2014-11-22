@@ -8,7 +8,7 @@ import os,sys,re
 from datetime import datetime
 ##sys.path.insert(0, r'E:\python\imagetagger')
 from taglistingmanager import TagListingManager
-
+import subprocess
 from PIL import Image
 
 def get_date_taken(path):
@@ -24,6 +24,15 @@ def saveFile(tiednimi,sisalto):
     f = open(tiednimi, 'w')
     f.write(sisalto)
     f.close()
+
+def getVolSerial():
+    batcmd = "dir"
+    cmdinfo = subprocess.check_output(batcmd, shell=True)
+##    print cmdinfo[:130]
+    hdvolserial =re.findall(r'Volume Serial Number is (.*?)\r\n', cmdinfo[:130])[0]
+    return hdvolserial
+
+
 
 class MainWindow(QtGui.QMainWindow):
     def __init__(self,taglisting):
@@ -46,10 +55,8 @@ class MainWindow(QtGui.QMainWindow):
         self.kuvakansio=r"E:\kuvat\137___08"
         self.readPrefs()
 
-        os.chdir(self.kuvakansio)
-        self.kuvatiedostolista=os.listdir(self.kuvakansio)
+        self.scanImagesFolder()
 
-        self.indx=0
 ##        print self.kuvatiedostolista[self.indx]
 
         self.publishList=[]
@@ -70,7 +77,21 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle("ImageTagger")
         self.tagitlineEdit.setFocus()
         self.indx=self.jumpToEmpty()
+
+
         self.loadImg()
+
+    def scanWithSubfolders(self):
+        pass
+
+    def scanImagesFolder(self):
+        if self.listSubfolders:
+            self.scanWithSubfolders()
+        else:
+            os.chdir(self.kuvakansio)
+            self.kuvatiedostolista=os.listdir(self.kuvakansio)
+        self.volserial= getVolSerial()
+        self.indx=0
 
     def readPrefs(self):
         prefs=loadAFile(".prefs")
@@ -268,10 +289,17 @@ class MainWindow(QtGui.QMainWindow):
     def setExistingDirectory(self):
         options = QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ShowDirsOnly
         directory = QtGui.QFileDialog.getExistingDirectory(self,
-                "QFileDialog.getExistingDirectory()",
+                "Choose images folder",
                 self.directoryLabel.text(), options)
         if directory:
             self.directoryLabel.setText(directory)
+            self.kuvakansio = directory
+            self.scanImagesFolder()
+            self.tagitlineEdit.setFocus()
+
+            self.indx=self.jumpToEmpty()
+            print "self.indx " ,self.indx
+            self.loadImg()
 
     def newFile(self):
         self.infoLabel.setText("Invoked <b>File|New</b>")
@@ -486,7 +514,7 @@ class MainWindow(QtGui.QMainWindow):
         tagirivi = self.kuvatiedostolista[self.indx]+" | "+ self.tagitlineEdit.text() +" | "+ date_taken + " " + time+" "+self.pixkoko+" "+koko+" | "
 
         timenowstr= "{0:%d.%m.%Y %H:%M:%S}".format(datetime.now())
-        tagirivi += self.kuvakansio +" | tagd: " + timenowstr + "\n"
+        tagirivi += self.kuvakansio +" | tagd: " + timenowstr + " | volserial: " + self.volserial +"\n"
         print tagirivi
         self.taglisting.lisaaTagi(self.tagitlineEdit.text(), tagirivi)
         self.lastTagi=self.tagitlineEdit.text()
@@ -515,8 +543,11 @@ class MainWindow(QtGui.QMainWindow):
         self.pixkoko= str(pixkokoz[0])+"X"+str(pixkokoz[1])
         pxmap = QtGui.QPixmap.fromImage(image)
         pxmap=pxmap.scaledToHeight(600)
-        if self.kuvatiedostolista[self.indx] in self.taglisting.kuvatHash.keys() :  #jos kuva on jo luettelossa
-            self.tagitlineEdit.setText( self.taglisting.kuvatHash[self.kuvatiedostolista[self.indx]].decode("utf-8"))
+        if unicode( self.kuvatiedostolista[self.indx]) in self.taglisting.kuvatHash.keys() :  #jos kuva on jo luettelossa
+            try:
+                self.tagitlineEdit.setText( self.taglisting.kuvatHash[self.kuvatiedostolista[self.indx]].decode("utf-8"))
+            except:
+                self.tagitlineEdit.setText( self.taglisting.kuvatHash[self.kuvatiedostolista[self.indx]])
 ##        else:
 ##            self.tagitlineEdit.setText("")
         self.imageLabel.setPixmap(pxmap)
