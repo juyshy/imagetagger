@@ -61,6 +61,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.taglisting = taglisting
         self.taglisting.subscribe(self)
+        self.kaikkiKansionKuvatTagatty=False
         self.debug = False
         self.debugLog = ""
         self.debugLogFile = "debuglogi.txt"
@@ -99,7 +100,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle("ImageTagger")
         self.tagitlineEdit.setFocus()
         self.debugLog += self.taglisting.debugLog
-        self.indx=self.jumpToEmpty()
+        self.jumpToUntagged()
         if self.debug:
             saveFile(self.appDirectory + "\\" + self.debugLogFile, self.debugLog)
 
@@ -324,7 +325,7 @@ class MainWindow(QtGui.QMainWindow):
             self.scanImagesFolder()
             self.tagitlineEdit.setFocus()
 
-            self.indx=self.jumpToEmpty()
+            self.jumpToUntagged()
             print "self.indx " ,self.indx
             self.loadImg()
             self.tagitlineEdit.selectAll()
@@ -520,25 +521,30 @@ class MainWindow(QtGui.QMainWindow):
 ##        wordList = ["alpha", "omega", "omicron", "zeta"]
         self.setCompleterList()
 
-    def jumpToEmpty(self):
+    def lasketagattyjenLukumaara(self):
         self.tagattyLukumaara=0
 ##        print self.taglisting.kuvatHash.keys()
-        self.debugLog += "\nkuvatHash.keys()\n"
-        self.debugLog += "\n".join(self.taglisting.kuvatHash.keys()).encode("utf-8") +"\n\n"
-        self.debugLog += "kuvatiedostolista: \n"
+        if self.debug:
+            self.debugLog += "\nkuvatHash.keys()\n"
+            self.debugLog += "\n".join(self.taglisting.kuvatHash.keys()).encode("utf-8") +"\n\n"
+            self.debugLog += "kuvatiedostolista: \n"
         for i, kuva in enumerate( self.kuvatiedostolista):
 ##            print kuva
             if self.debug:
                 self.debugLog += kuva + "\n"
             if kuva in self.taglisting.kuvatHash.keys():
                 self.tagattyLukumaara +=1
+
+    def jumpToUntagged(self):
+        self.lasketagattyjenLukumaara()
         if self.tagattyLukumaara < len(self.kuvatiedostolista):
             for i, kuva in enumerate( self.kuvatiedostolista):
                 if kuva not in self.taglisting.kuvatHash.keys():
                     break
-            return i
+            self.indx=i
         else:
-            return 0
+            self.kaikkiKansionKuvatTagatty = True
+            self.indx=0
 
     def setCompleterList(self):
         tageiar=[]
@@ -598,14 +604,21 @@ class MainWindow(QtGui.QMainWindow):
             self.nextImage()
 
 
-    def loadImg(self):
-        fileName = self.kuvatiedostolista[self.indx] #r"E:\kuvat\IMG_2561.JPG"
+    def setImageInfoLabel(self):
+        fileName = self.kuvatiedostolista[self.indx]
         infotxt = "Kansio: " + self.kuvakansio + "     kuva: " +fileName
         infotxt += "    " + str(self.indx+1) +"/" + str( len(self.kuvatiedostolista))
         infotxt += "    otettu: " +  get_date_taken(fileName)
-        infotxt += "    tagatty: " +  str(self.tagattyLukumaara) +"/" + str( len(self.kuvatiedostolista))
-
+        if self.kaikkiKansionKuvatTagatty:
+            infotxt += "   Kaikki kansion " +str(self.tagattyLukumaara) + " kuvaa jo tagatty"
+        else:
+            infotxt += "    tagatty: " +  str(self.tagattyLukumaara) +"/" + str( len(self.kuvatiedostolista))
         self.infolabel.setText(infotxt)
+
+    def loadImg(self):
+        fileName = self.kuvatiedostolista[self.indx] #r"E:\kuvat\IMG_2561.JPG"
+        self.setImageInfoLabel()
+##        self.infolabel.setText(infotxt)
         image = QtGui.QImage(fileName)
         if image.isNull():
             QtGui.QMessageBox.information(self, "Image Viewer",
