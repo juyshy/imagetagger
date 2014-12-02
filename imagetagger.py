@@ -163,19 +163,22 @@ class MainWindow(QtGui.QMainWindow):
         self.indx=0
 
     def readPrefs(self):
-        prefs=loadAFile(".prefs")
-        prefsLines = prefs.split("\n")
-        prefsHash={}
-        for prfline in prefsLines:
-            prfkeyvaluepair= prfline.split("=")
-            prefsHash[prfkeyvaluepair[0]]=prfkeyvaluepair[1]
+        try:
+            prefs=loadAFile(".prefs")
+            prefsLines = prefs.split("\n")
+            prefsHash={}
+            for prfline in prefsLines:
+                prfkeyvaluepair= prfline.split("=")
+                prefsHash[prfkeyvaluepair[0]]=prfkeyvaluepair[1]
 
-        self.autoNextPic= prefsHash["autoNextPic"]== "True"
-        self.listSubfolders=prefsHash["listSubfolders"]== "True"
-        self.kuvakansio=prefsHash["kuvakansio"]
-        print self.autoNextPic
-        print self.listSubfolders
-        print self.kuvakansio
+            self.autoNextPic= prefsHash["autoNextPic"]== "True"
+            self.listSubfolders=prefsHash["listSubfolders"]== "True"
+            self.kuvakansio=prefsHash["kuvakansio"]
+            print self.autoNextPic
+            print self.listSubfolders
+            print self.kuvakansio
+        except:
+            print "you need a .prefs file"
 
     def createActions(self):
         self.newAct = QtGui.QAction("&New taglisting", self,
