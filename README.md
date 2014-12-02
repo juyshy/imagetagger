@@ -9,6 +9,8 @@ Use:
 2) enter tags and hit enter
 3) that's it!
 
+Python Pacages requirements: Pyside, PIL
+
 features:
 auto completion: application reads all previously entered tags and uses them as autocomplete text
 

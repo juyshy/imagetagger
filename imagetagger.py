@@ -328,32 +328,32 @@ class MainWindow(QtGui.QMainWindow):
 
     def createMenus(self):
         self.fileMenu = self.menuBar().addMenu("&File")
-        self.fileMenu.addAction(self.newAct)
+##        self.fileMenu.addAction(self.newAct)
         self.fileMenu.addAction(self.openAct)
-        self.fileMenu.addAction(self.saveAct)
+##        self.fileMenu.addAction(self.saveAct)
         self.fileMenu.addAction(self.chooseFolderAct)
 
-        self.fileMenu.addAction(self.printAct)
+##        self.fileMenu.addAction(self.printAct)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAct)
 
-        self.editMenu = self.menuBar().addMenu("&Edit")
-        self.editMenu.addAction(self.undoAct)
-        self.editMenu.addAction(self.redoAct)
-        self.editMenu.addSeparator()
-        self.editMenu.addAction(self.cutAct)
-        self.editMenu.addAction(self.copyAct)
-        self.editMenu.addAction(self.pasteAct)
-        self.editMenu.addSeparator()
+##        self.editMenu = self.menuBar().addMenu("&Edit")
+##        self.editMenu.addAction(self.undoAct)
+##        self.editMenu.addAction(self.redoAct)
+##        self.editMenu.addSeparator()
+##        self.editMenu.addAction(self.cutAct)
+##        self.editMenu.addAction(self.copyAct)
+##        self.editMenu.addAction(self.pasteAct)
+##        self.editMenu.addSeparator()
 
-        self.imagesMenu = self.menuBar().addMenu("&Images")
-        self.imagesMenu.addAction(self.jumpToIndexAct)
-        self.imagesMenu.addAction(self.loadListByTagsAct)
+##        self.imagesMenu = self.menuBar().addMenu("&Images")
+##        self.imagesMenu.addAction(self.jumpToIndexAct)
+##        self.imagesMenu.addAction(self.loadListByTagsAct)
 
         self.publishMenu = self.menuBar().addMenu("&Publish")
 
-        self.publishMenu.addAction(self.loadPublishListAct)
-        self.publishMenu.addAction(self.showPublishListAct)
+##        self.publishMenu.addAction(self.loadPublishListAct)
+##        self.publishMenu.addAction(self.showPublishListAct)
         self.publishMenu.addAction(self.savePubListAct)
         self.publishMenu.addAction(self.copyPublishIMagesToTempFolderAct)
         self.publishMenu.addAction(self.clearPubListAct)
@@ -419,6 +419,7 @@ class MainWindow(QtGui.QMainWindow):
     def loadPublishList(self):
         self.infoLabel.setText("Invoked <b>Load Publish List</b>")
 
+
     def showPublishList(self):
         self.infoLabel.setText("Invoked <b>Show Publish List</b>")
         print self.publishList
@@ -480,8 +481,8 @@ class MainWindow(QtGui.QMainWindow):
     def about(self):
         self.infoLabel.setText("Invoked <b>Help|About</b>")
         QtGui.QMessageBox.about(self, "About Menu",
-                "The <b>Menu</b> example shows how to create menu-bar menus "
-                "and context menus.")
+                "<b>Imagetagger</b> is a image tagging aplication."
+                "Tag fast, find pics fast.")
 
     def aboutQt(self):
         self.infoLabel.setText("Invoked <b>Help|About Qt</b>")
@@ -747,7 +748,8 @@ if __name__ == '__main__':
     import sys
 
     app = QtGui.QApplication(sys.argv)
-    ohjelmapath=r"E:\python\imagetagger"
+    ohjelmapath=os.path.dirname(os.path.realpath(__file__))
+    print "ohjelmapath ", ohjelmapath
     tagilistMangr= TagListingManager(ohjelmapath)
 ##    dialog = Dialog(tagilistMangr)
     window = MainWindow(tagilistMangr)
