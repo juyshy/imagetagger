@@ -1,15 +1,15 @@
 imagetagger
 ===========
 
-Python pyside image files management.
+Python/pyside image files management.
 The main objective of this application is to make tagging images as easy as possible.
 
 Use:
-1) choose a foder with digital images
+1) choose a folder with digital images
 2) enter tags and hit enter
 3) that's it!
 
-Python Pacages requirements: Pyside, PIL
+Python Packages requirements: Pyside, PIL
 
 features:
 auto completion: application reads all previously entered tags and uses them as autocomplete text
