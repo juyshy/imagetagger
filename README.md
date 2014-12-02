@@ -1,7 +1,7 @@
 imagetagger
 ===========
 
-Python pyside image files management
+Python pyside image files management.
 The main objective of this application is to make tagging images as easy as possible.
 
 Use:
