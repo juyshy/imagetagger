@@ -32,24 +32,26 @@ def getVolSerial():
     hdvolserial =re.findall(r'Volume Serial Number is (.*?)\r\n', cmdinfo[:130])[0]
     return hdvolserial
 
-class ImageInfo(Object):
-    def __init__(self,fullpath,infoSource = 'harddrive'):
-        self.filename = os.path.dirname(fullpath)
-        self.fullpath = fullpath
-        self.folderpath = os.path.dirname(fullpath)
+
+class ImageInfo(object):
+    def __init__(self,filename,infosource = 'harddrive'):
+        self.filename = filename #os.path.dirname(fullpath)
+        self.fullpath = None
+        self.folderpath = None # os.path.dirname(fullpath)
         self.size = None
-        self.lastModTime= None
-        self.picTaken= None
+        self.lastmodified= None
+        self.pictaken= None
         self.tags= None
         self.title= None
         self.pubtags= None
-        self.pixelSize= None
-        self.storageVolserial = None
-
+        self.pixsize= None
+        self.volserial = None
+        self.taggedtime = None
         self.unsharp = False
-        self.pendingDelete = False
-        self.infoSource = infoSource
-        if  self.infoSource == 'harddrive':
+        self.pendingdelete = False
+        self.infosource = infosource
+
+        if  self.infosource == 'harddrive':
             self.scanMetadata()
 
 
@@ -58,16 +60,15 @@ class ImageInfo(Object):
                 self.size=os.path.getsize(self.fullpath )
             except:
                 pass
-
             try:
-                self.lastModTime=os.path.getmtime(self.fullpath )
+                self.lastmodified=os.path.getmtime(self.fullpath )
+            except:
+                pass
+            try:
+                self.pictaken =  get_date_taken(path)
             except:
                 pass
 
-            try:
-                self.picTaken =  get_date_taken(path)
-            except:
-                pass
 
 
 class HoverLabel(QtGui.QLabel):
@@ -104,7 +105,7 @@ class MainWindow(QtGui.QMainWindow):
         self.debugLog = ""
         self.debugLogFile = "debuglogi.txt"
 
-        self.imgFileExtensionsRgx = r'\,(jpg)|(JPG)|(PNG)|(png)'
+        self.imgFileExtensionsRgx = r'\.(jpg)|(JPG)|(PNG)|(png)'
         handcursor= QtGui.QCursor(QtCore.Qt.OpenHandCursor)
 ##        self.setCursor(cursor)
         pyappfilepath = os.path.realpath(__file__)
@@ -495,7 +496,7 @@ class MainWindow(QtGui.QMainWindow):
         self.gridGroupBox = QtGui.QGroupBox("Grid layout")
         layout = QtGui.QGridLayout()
         layout.setColumnMinimumWidth(1, 700)
-        layout.setRowMinimumHeight(0, 400)
+        layout.setRowMinimumHeight(0, 300)
 ##        for i in range(Dialog.NumGridRows):
 
         vbox = QtGui.QVBoxLayout(self)
@@ -693,7 +694,7 @@ class MainWindow(QtGui.QMainWindow):
         pixkokoz=size.width(), size.height()
         self.pixkoko= str(pixkokoz[0])+"X"+str(pixkokoz[1])
         pxmap = QtGui.QPixmap.fromImage(image)
-        pxmap=pxmap.scaledToHeight(550)
+        pxmap=pxmap.scaledToHeight(500)
         kuva=os.path.basename(self.kuvatiedostolista[self.indx])
         if unicode( kuva) in self.taglisting.kuvatHash.keys() :  #jos kuva on jo luettelossa
             try:
